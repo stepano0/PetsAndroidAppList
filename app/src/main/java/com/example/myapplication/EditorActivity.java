@@ -32,6 +32,7 @@ import java.util.Locale;
 public class EditorActivity extends AppCompatActivity {
 
     private Long editPetId;
+    private PetUnit localUnit;
 
     /** Поле EditText для ввода имени питомца  */
     private EditText mNameEditText;
@@ -73,11 +74,12 @@ public class EditorActivity extends AppCompatActivity {
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
                 Cursor cursor = db.rawQuery("SELECT * FROM " + PetContract.PetEntry.TABLE_NAME + " WHERE _ID =?", new String[]{String.valueOf(editPetId)});
                 cursor.moveToFirst();
-                PetUnit unit = new PetUnit(cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getInt(4));
-                mNameEditText.setText(unit.getPetName());
-                mBreedEditText.setText(unit.getPetBreed());
-                mGender = unit.getPetGender();
-                mWeightEditText.setText(String.valueOf(unit.getPetWeight()));
+                localUnit = new PetUnit(cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getInt(4));
+                localUnit.setId(editPetId);
+                mNameEditText.setText(localUnit.getPetName());
+                mBreedEditText.setText(localUnit.getPetBreed());
+                mGender = localUnit.getPetGender();
+                mWeightEditText.setText(String.valueOf(localUnit.getPetWeight()));
                 cursor.close();
             }
         }
@@ -138,7 +140,9 @@ public class EditorActivity extends AppCompatActivity {
             // Отвечаем на щелчок по опции меню "Сохранить"
             case R.id.action_save:
                 if (editPetId != null){
-                    
+                    PetUnit unit = new PetUnit(mNameEditText.getText().toString(), mBreedEditText.getText().toString(),
+                            mGender, Integer.parseInt(mWeightEditText.getText().toString()));
+                    updatePet(unit);
                 }
                 else {
                     PetUnit newUnit = new PetUnit(mNameEditText.getText().toString(), mBreedEditText.getText().toString(),
@@ -148,7 +152,9 @@ public class EditorActivity extends AppCompatActivity {
                 return true;
             //Отвечаем на щелчок по опции меню "Удалить"
             case R.id.action_delete:
-
+                if (localUnit != null){
+                    delitePet(localUnit);
+                }
                 // Пока ничего не делаем
                 return true;
             // Отвечаем на нажатие кнопки со стрелкой «Вверх» на панели приложения
@@ -182,8 +188,30 @@ public class EditorActivity extends AppCompatActivity {
         startActivity(intent); //Возвращаем прежний активити
     }
     private void updatePet(PetUnit unit){
+        if (localUnit != null){
+            PetDbHelper dbHelper = new PetDbHelper(this);
+            try (SQLiteDatabase db = dbHelper.getWritableDatabase()){
+                ContentValues values = new ContentValues();
+                values.put(PetContract.PetEntry.COLUMN_PET_NAME,unit.getPetName());
+                values.put(PetContract.PetEntry.COLUMN_PET_BREED,unit.getPetBreed());
+                values.put(PetContract.PetEntry.COLUMN_PET_GENDER,unit.getPetGender());
+                values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT,unit.getPetWeight());
+                db.update(PetContract.PetEntry.TABLE_NAME, values, "_id = ?", new String[]{String.valueOf(localUnit.getId())});
+            }
+        }
+        Intent intent = new Intent(EditorActivity.this, CatalogActivity.class);
+        startActivity(intent);
+    }
+    private void delitePet(PetUnit unit){
+        if (localUnit.getId() != 0){
+            PetDbHelper dbHelper = new PetDbHelper(this);
+            try (SQLiteDatabase db = dbHelper.getWritableDatabase()){
+                db.delete(PetContract.PetEntry.TABLE_NAME, "_id = ?", new String[]{String.valueOf(unit.getId())});
+            }
 
-
+            Intent intent = new Intent(EditorActivity.this, CatalogActivity.class);
+            startActivity(intent);
+        }
     }
 
 

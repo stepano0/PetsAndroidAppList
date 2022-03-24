@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 
 public class PetUnit {
+    private long id;
     private String petName;
     private String petBreed;
     private int petGender;
@@ -18,6 +19,12 @@ public class PetUnit {
         this.petWeight = petWeight;
     }
 
+    public long getId() {
+        return id;
+    }
+    public void setId(long id) {
+        this.id = id;
+    }
     public String getPetName() {
         return petName;
     }
