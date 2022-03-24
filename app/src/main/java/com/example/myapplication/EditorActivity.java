@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,10 +24,14 @@ import androidx.core.app.NavUtils;
 import com.example.myapplication.data.PetContract;
 import com.example.myapplication.data.PetDbHelper;
 
+import java.util.Locale;
+
 /**
  * Позволяет пользователю создать нового питомца или отредактировать существующего.
  */
 public class EditorActivity extends AppCompatActivity {
+
+    private Long editPetId;
 
     /** Поле EditText для ввода имени питомца  */
     private EditText mNameEditText;
@@ -59,6 +64,23 @@ public class EditorActivity extends AppCompatActivity {
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
         setupSpinner();
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            editPetId = extras.getLong("id");
+
+            if (editPetId > 0) {
+                PetDbHelper dbHelper = new PetDbHelper(this);
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                Cursor cursor = db.rawQuery("SELECT * FROM " + PetContract.PetEntry.TABLE_NAME + " WHERE _ID =?", new String[]{String.valueOf(editPetId)});
+                cursor.moveToFirst();
+                PetUnit unit = new PetUnit(cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getInt(4));
+                mNameEditText.setText(unit.getPetName());
+                mBreedEditText.setText(unit.getPetBreed());
+                mGender = unit.getPetGender();
+                mWeightEditText.setText(String.valueOf(unit.getPetWeight()));
+                cursor.close();
+            }
+        }
     }
 
     /**
@@ -115,10 +137,18 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Отвечаем на щелчок по опции меню "Сохранить"
             case R.id.action_save:
-                insertPet();
+                if (editPetId != null){
+                    
+                }
+                else {
+                    PetUnit newUnit = new PetUnit(mNameEditText.getText().toString(), mBreedEditText.getText().toString(),
+                            mGender, Integer.parseInt(mWeightEditText.getText().toString()));
+                    insertPet(newUnit);
+                }
                 return true;
             //Отвечаем на щелчок по опции меню "Удалить"
             case R.id.action_delete:
+
                 // Пока ничего не делаем
                 return true;
             // Отвечаем на нажатие кнопки со стрелкой «Вверх» на панели приложения
@@ -130,12 +160,12 @@ public class EditorActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void insertPet(){
+    private void insertPet(PetUnit newUnit){
         ContentValues values = new ContentValues();
-        values.put(PetContract.PetEntry.COLUMN_PET_NAME,mNameEditText.getText().toString().trim());
-        values.put(PetContract.PetEntry.COLUMN_PET_BREED,mBreedEditText.getText().toString().trim());
-        values.put(PetContract.PetEntry.COLUMN_PET_GENDER,mGender);
-        values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT,mWeightEditText.getText().toString().trim());
+        values.put(PetContract.PetEntry.COLUMN_PET_NAME,newUnit.getPetName());
+        values.put(PetContract.PetEntry.COLUMN_PET_BREED,newUnit.getPetBreed());
+        values.put(PetContract.PetEntry.COLUMN_PET_GENDER,newUnit.getPetGender());
+        values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT,newUnit.getPetWeight());
 
         PetDbHelper dbHelper = new PetDbHelper(this);
         long newRowId = 0;
@@ -150,6 +180,10 @@ public class EditorActivity extends AppCompatActivity {
 
         Intent intent = new Intent(EditorActivity.this, CatalogActivity.class);// создается интент чтобы открыть Активити редактора
         startActivity(intent); //Возвращаем прежний активити
+    }
+    private void updatePet(PetUnit unit){
+
+
     }
 
 
