@@ -17,6 +17,7 @@ public final class PetContract {
         public final static String COLUMN_PET_BREED = "breed";
         public final static String COLUMN_PET_GENDER = "gender";
         public final static String COLUMN_PET_WEIGHT = "weight";
+        public final static String COLUMN_PET_STR_GENDER = "str_gender";
 
 
         //значения для пола питомца.

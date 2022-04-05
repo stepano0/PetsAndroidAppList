@@ -96,9 +96,9 @@ public class CatalogActivity extends AppCompatActivity {
 
         Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
         if (cursor.getCount() > 0) {
-            String[] headers = new String[]{PetEntry.COLUMN_PET_NAME, PetEntry.COLUMN_PET_BREED};
-            SimpleCursorAdapter petAdapter = new SimpleCursorAdapter(this, android.R.layout.two_line_list_item, cursor, headers
-                    , new int[]{android.R.id.text1, android.R.id.text2}, 0);
+            String[] headers = new String[]{PetEntry.COLUMN_PET_NAME, PetEntry.COLUMN_PET_BREED, PetEntry.COLUMN_PET_STR_GENDER, PetEntry.COLUMN_PET_WEIGHT};
+            SimpleCursorAdapter petAdapter = new SimpleCursorAdapter(this, R.layout.for_list_view_item, cursor, headers
+                    , new int[]{R.id.textView, R.id.textView2,R.id.textView3, R.id.textView4 }, 0);
             listView.setAdapter(petAdapter);
         }
             // Отображаем количество строк в курсоре (которое отражает количество строк в

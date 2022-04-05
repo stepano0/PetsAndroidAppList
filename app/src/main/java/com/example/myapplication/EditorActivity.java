@@ -171,6 +171,7 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetContract.PetEntry.COLUMN_PET_BREED,newUnit.getPetBreed());
         values.put(PetContract.PetEntry.COLUMN_PET_GENDER,newUnit.getPetGender());
         values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT,newUnit.getPetWeight());
+        values.put(PetContract.PetEntry.COLUMN_PET_STR_GENDER,newUnit.getStrGender());
 
         PetDbHelper dbHelper = new PetDbHelper(this);
         long newRowId = 0;
@@ -195,6 +196,7 @@ public class EditorActivity extends AppCompatActivity {
                 values.put(PetContract.PetEntry.COLUMN_PET_BREED,unit.getPetBreed());
                 values.put(PetContract.PetEntry.COLUMN_PET_GENDER,unit.getPetGender());
                 values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT,unit.getPetWeight());
+                values.put(PetContract.PetEntry.COLUMN_PET_STR_GENDER,unit.getStrGender());
                 db.update(PetContract.PetEntry.TABLE_NAME, values, "_id = ?", new String[]{String.valueOf(localUnit.getId())});
             }
         }

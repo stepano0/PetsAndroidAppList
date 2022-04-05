@@ -7,6 +7,7 @@ public class PetUnit {
     private String petBreed;
     private int petGender;
     private int petWeight;
+    private String petStrGender;
 
     public PetUnit() {
 
@@ -17,8 +18,12 @@ public class PetUnit {
         this.petBreed = petBreed;
         this.petGender = petGender;
         this.petWeight = petWeight;
+        this.petStrGender = getStrGender();
     }
 
+    public void setPetStrGender(String petStrGender) {
+        this.petStrGender = petStrGender;
+    }
     public long getId() {
         return id;
     }
@@ -60,6 +65,6 @@ public class PetUnit {
     }
     @Override
     public String toString() {
-        return "petName='" + petName + ' ' +", petBreed='" + petBreed + ' ' +", petGender=" + getStrGender() +", petWeight=" + petWeight;
+        return "petName='" + petName + ' ' +", petBreed='" + petBreed + ' ' +", petGender=" + petStrGender +", petWeight=" + petWeight;
     }
 }
