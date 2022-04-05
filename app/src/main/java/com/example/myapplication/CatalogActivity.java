@@ -1,7 +1,6 @@
 
 package com.example.myapplication;
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,19 +9,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.data.PetContract.PetEntry;
 import com.example.myapplication.data.PetDbHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /*
@@ -57,8 +53,7 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
-        //selectThread.start();
-        displayDatabaseInfo();
+        selectThread.start();
     }
 
     @Override
@@ -80,8 +75,10 @@ public class CatalogActivity extends AppCompatActivity {
                 try  (SQLiteDatabase db = dbhelper.getWritableDatabase()){
                     db.delete(PetEntry.TABLE_NAME,null,null);
                 }
-                listView.removeAllViews();
-                displayDatabaseInfo();
+                listView.setAdapter(null);
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);// создается интент чтобы открыть Активити редактора
+                startActivity(intent); //запускаем интент
+                Toast.makeText(this, "Это фича",Toast.LENGTH_LONG).show();
 
                 return true;
         }

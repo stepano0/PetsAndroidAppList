@@ -13,18 +13,15 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 
+import com.example.myapplication.Model.PetUnit;
 import com.example.myapplication.data.PetContract;
 import com.example.myapplication.data.PetDbHelper;
-
-import java.util.Locale;
 
 /**
  * Позволяет пользователю создать нового питомца или отредактировать существующего.
@@ -79,6 +76,7 @@ public class EditorActivity extends AppCompatActivity {
                 mNameEditText.setText(localUnit.getPetName());
                 mBreedEditText.setText(localUnit.getPetBreed());
                 mGender = localUnit.getPetGender();
+                mGenderSpinner.setSelection(mGender);
                 mWeightEditText.setText(String.valueOf(localUnit.getPetWeight()));
                 cursor.close();
             }
@@ -142,7 +140,8 @@ public class EditorActivity extends AppCompatActivity {
                 if (editPetId != null){
                     PetUnit unit = new PetUnit(mNameEditText.getText().toString(), mBreedEditText.getText().toString(),
                             mGender, Integer.parseInt(mWeightEditText.getText().toString()));
-                    updatePet(unit);
+                    DBUpdateTread dbUpdateTread = new DBUpdateTread(unit);
+                    dbUpdateTread.start();
                 }
                 else {
                     PetUnit newUnit = new PetUnit(mNameEditText.getText().toString(), mBreedEditText.getText().toString(),
@@ -213,7 +212,19 @@ public class EditorActivity extends AppCompatActivity {
             startActivity(intent);
         }
     }
+    private class DBUpdateTread extends Thread{
+        private PetUnit refractUnit;
 
+        public DBUpdateTread(PetUnit newUnit) {
+            this.refractUnit = newUnit;
+        }
+
+        @Override
+        public void run(){
+            updatePet(refractUnit);
+        }
+
+    }
 
 
 }
