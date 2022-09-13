@@ -63,9 +63,9 @@ public class EditorActivity extends AppCompatActivity {
 
         setupSpinner();
         Bundle extras = getIntent().getExtras();
+
         if (extras != null) {
             editPetId = extras.getLong("id");
-
             if (editPetId > 0) {
                 PetDbHelper dbHelper = new PetDbHelper(this);
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -146,13 +146,17 @@ public class EditorActivity extends AppCompatActivity {
                 else {
                     PetUnit newUnit = new PetUnit(mNameEditText.getText().toString(), mBreedEditText.getText().toString(),
                             mGender, Integer.parseInt(mWeightEditText.getText().toString()));
-                    insertPet(newUnit);
+                    Runnable insertIvent = () -> insertPet(newUnit);
+                    insertIvent.run();
                 }
                 return true;
             //Отвечаем на щелчок по опции меню "Удалить"
             case R.id.action_delete:
                 if (localUnit != null){
-                    delitePet(localUnit);
+                    Runnable deliteIvent = () ->{
+                        delitePet(localUnit);
+                    };
+                    deliteIvent.run();
                 }
                 // Пока ничего не делаем
                 return true;

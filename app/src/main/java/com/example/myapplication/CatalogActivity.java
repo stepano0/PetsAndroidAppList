@@ -20,10 +20,6 @@ import com.example.myapplication.data.PetContract.PetEntry;
 import com.example.myapplication.data.PetDbHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-
-/*
-** Отображает список домашних животных, которые были введены и сохранены в приложении.
-*/
 public class CatalogActivity extends AppCompatActivity {
     ListView listView;
     DbSelectThread selectThread = new DbSelectThread();
@@ -72,13 +68,17 @@ public class CatalogActivity extends AppCompatActivity {
             case R.id.action_delete_all_entries:
                 // Пока ничего не делаем
                 PetDbHelper dbhelper = new PetDbHelper(this);
-                try  (SQLiteDatabase db = dbhelper.getWritableDatabase()){
-                    db.delete(PetEntry.TABLE_NAME,null,null);
-                }
-                listView.setAdapter(null);
-                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);// создается интент чтобы открыть Активити редактора
-                startActivity(intent); //запускаем интент
+                Runnable runnable = () -> {
+                    try  (SQLiteDatabase db = dbhelper.getWritableDatabase()){
+                        db.delete(PetEntry.TABLE_NAME,null,null);
+                    }
+                    listView.setAdapter(null);
+                    Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);// создается интент чтобы открыть Активити редактора
+                    startActivity(intent); //запускаем интент
+                };
+                runnable.run();
                 Toast.makeText(this, "Это фича",Toast.LENGTH_LONG).show();
+
 
                 return true;
         }
@@ -94,10 +94,17 @@ public class CatalogActivity extends AppCompatActivity {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
+//        Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
+        String[] projection = {
+                PetEntry.COLUMN_PET_NAME,
+                PetEntry.COLUMN_PET_BREED,
+                PetEntry.COLUMN_PET_STR_GENDER,
+                PetEntry.COLUMN_PET_WEIGHT};
+        Cursor cursor = db.query(PetEntry.TABLE_NAME,
+                null, null, null,
+                null, null, null );
         if (cursor.getCount() > 0) {
-            String[] headers = new String[]{PetEntry.COLUMN_PET_NAME, PetEntry.COLUMN_PET_BREED, PetEntry.COLUMN_PET_STR_GENDER, PetEntry.COLUMN_PET_WEIGHT};
-            SimpleCursorAdapter petAdapter = new SimpleCursorAdapter(this, R.layout.for_list_view_item, cursor, headers
+            SimpleCursorAdapter petAdapter = new SimpleCursorAdapter(this, R.layout.for_list_view_item, cursor, projection
                     , new int[]{R.id.textView, R.id.textView2,R.id.textView3, R.id.textView4 }, 0);
             listView.setAdapter(petAdapter);
         }

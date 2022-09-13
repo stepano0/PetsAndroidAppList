@@ -28,7 +28,7 @@
         android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/text_view_pet" />
+        android:layout_below="@id/text_view_pet"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -41,6 +41,7 @@
         android:layout_marginTop="@dimen/fab_margin"
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="@dimen/fab_margin"
-        android:backgroundTint="@color/colorAccent"
+        android:backgroundTint="@color/purple_200"
         android:src="@drawable/ic_add_pet" />
+
 </RelativeLayout>

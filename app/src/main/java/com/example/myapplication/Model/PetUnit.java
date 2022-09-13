@@ -21,9 +21,6 @@ public class PetUnit {
         this.petStrGender = getStrGender();
     }
 
-    public void setPetStrGender(String petStrGender) {
-        this.petStrGender = petStrGender;
-    }
     public long getId() {
         return id;
     }
