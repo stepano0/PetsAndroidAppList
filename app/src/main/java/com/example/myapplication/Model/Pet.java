@@ -1,7 +1,7 @@
 package com.example.myapplication.Model;
 
 
-public class PetUnit {
+public class Pet {
     private long id;
     private String petName;
     private String petBreed;
@@ -9,11 +9,11 @@ public class PetUnit {
     private int petWeight;
     private String petStrGender;
 
-    public PetUnit() {
+    public Pet() {
 
     }
 
-    public PetUnit(String petName, String petBreed, int petGender, int petWeight) {
+    public Pet(String petName, String petBreed, int petGender, int petWeight) {
         this.petName = petName;
         this.petBreed = petBreed;
         this.petGender = petGender;

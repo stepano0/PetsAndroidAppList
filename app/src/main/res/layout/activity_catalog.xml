@@ -24,12 +24,6 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/activity_margin" />
 
-    <ListView
-        android:id="@+id/listView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/text_view_pet"/>
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
 
         android:id="@+id/fab"

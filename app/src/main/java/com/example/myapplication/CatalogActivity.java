@@ -21,23 +21,12 @@ import com.example.myapplication.data.PetDbHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class CatalogActivity extends AppCompatActivity {
-    ListView listView;
-    DbSelectThread selectThread = new DbSelectThread();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);  //создается разметка на экране
-
-        listView = (ListView) findViewById(R.id.listView);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long id) {
-                Intent intent = new Intent(getApplicationContext(), EditorActivity.class);
-                intent.putExtra("id", id);
-                startActivity(intent);
-            }
-        });
 
         // Настраиваем FAB для открытия EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab); //находим кнопку на экране
@@ -49,7 +38,7 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
-        selectThread.start();
+        displayDatabaseInfo();
     }
 
     @Override
@@ -67,19 +56,6 @@ public class CatalogActivity extends AppCompatActivity {
             // Отвечаем на щелчок по пункту меню "Удалить все записи"
             case R.id.action_delete_all_entries:
                 // Пока ничего не делаем
-                PetDbHelper dbhelper = new PetDbHelper(this);
-                Runnable runnable = () -> {
-                    try  (SQLiteDatabase db = dbhelper.getWritableDatabase()){
-                        db.delete(PetEntry.TABLE_NAME,null,null);
-                    }
-                    listView.setAdapter(null);
-                    Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);// создается интент чтобы открыть Активити редактора
-                    startActivity(intent); //запускаем интент
-                };
-                runnable.run();
-                Toast.makeText(this, "Это фича",Toast.LENGTH_LONG).show();
-
-
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -90,35 +66,38 @@ public class CatalogActivity extends AppCompatActivity {
      * База данных домашних животных.
      */
     private void displayDatabaseInfo() {
+        TextView displayView = (TextView) findViewById(R.id.text_view_pet);
         PetDbHelper mDbHelper = new PetDbHelper(this);
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
-//        Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
-        String[] projection = {
-                PetEntry.COLUMN_PET_NAME,
-                PetEntry.COLUMN_PET_BREED,
-                PetEntry.COLUMN_PET_STR_GENDER,
-                PetEntry.COLUMN_PET_WEIGHT};
         Cursor cursor = db.query(PetEntry.TABLE_NAME,
                 null, null, null,
                 null, null, null );
-        if (cursor.getCount() > 0) {
-            SimpleCursorAdapter petAdapter = new SimpleCursorAdapter(this, R.layout.for_list_view_item, cursor, projection
-                    , new int[]{R.id.textView, R.id.textView2,R.id.textView3, R.id.textView4 }, 0);
-            listView.setAdapter(petAdapter);
+        int idPosition = cursor.getColumnIndex(PetEntry._ID);
+        int namePosition = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
+        int genderPosition = cursor.getColumnIndex(PetEntry.COLUMN_PET_GENDER);
+        int weighPosition = cursor.getColumnIndex(PetEntry.COLUMN_PET_WEIGHT);
+        int breedPosition = cursor.getColumnIndex(PetEntry.COLUMN_PET_BREED);
+        while (cursor.moveToNext()){
+            int corentID  = cursor.getInt(idPosition);
+            int corentWeigh  = cursor.getInt(weighPosition);
+            int corentGender  = cursor.getInt(genderPosition);
+            String corentName = cursor.getString(namePosition);
+            String corentBreed = cursor.getString(breedPosition);
+            displayView.append(corentID +" - ");
+            displayView.append(corentName+" - ");
+            displayView.append(corentBreed+" - ");
+            displayView.append(corentGender +" - ");
+            displayView.append(corentWeigh +" - ");
+            displayView.append("\n");
         }
+
+
             // Отображаем количество строк в курсоре (которое отражает количество строк в
             // таблица pets в базе данных).
-            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-            displayView.setText("Number of rows in pets database table: " + cursor.getCount());
+
+            displayView.append("Number of rows in pets database table: " + cursor.getCount());
 
 
-    }
-    private class DbSelectThread extends Thread{
-        @Override
-        public void run(){
-            displayDatabaseInfo();
-        }
     }
 }

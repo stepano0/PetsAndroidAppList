@@ -2,7 +2,6 @@ package com.example.myapplication;
 
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
@@ -19,7 +18,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 
-import com.example.myapplication.Model.PetUnit;
+import com.example.myapplication.Model.Pet;
 import com.example.myapplication.data.PetContract;
 import com.example.myapplication.data.PetDbHelper;
 
@@ -27,9 +26,6 @@ import com.example.myapplication.data.PetDbHelper;
  * Позволяет пользователю создать нового питомца или отредактировать существующего.
  */
 public class EditorActivity extends AppCompatActivity {
-
-    private Long editPetId;
-    private PetUnit localUnit;
 
     /** Поле EditText для ввода имени питомца  */
     private EditText mNameEditText;
@@ -62,25 +58,6 @@ public class EditorActivity extends AppCompatActivity {
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
         setupSpinner();
-        Bundle extras = getIntent().getExtras();
-
-        if (extras != null) {
-            editPetId = extras.getLong("id");
-            if (editPetId > 0) {
-                PetDbHelper dbHelper = new PetDbHelper(this);
-                SQLiteDatabase db = dbHelper.getReadableDatabase();
-                Cursor cursor = db.rawQuery("SELECT * FROM " + PetContract.PetEntry.TABLE_NAME + " WHERE _ID =?", new String[]{String.valueOf(editPetId)});
-                cursor.moveToFirst();
-                localUnit = new PetUnit(cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getInt(4));
-                localUnit.setId(editPetId);
-                mNameEditText.setText(localUnit.getPetName());
-                mBreedEditText.setText(localUnit.getPetBreed());
-                mGender = localUnit.getPetGender();
-                mGenderSpinner.setSelection(mGender);
-                mWeightEditText.setText(String.valueOf(localUnit.getPetWeight()));
-                cursor.close();
-            }
-        }
     }
 
     /**
@@ -137,27 +114,12 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Отвечаем на щелчок по опции меню "Сохранить"
             case R.id.action_save:
-                if (editPetId != null){
-                    PetUnit unit = new PetUnit(mNameEditText.getText().toString(), mBreedEditText.getText().toString(),
+                    Pet newPet = new Pet(mNameEditText.getText().toString(), mBreedEditText.getText().toString(),
                             mGender, Integer.parseInt(mWeightEditText.getText().toString()));
-                    DBUpdateTread dbUpdateTread = new DBUpdateTread(unit);
-                    dbUpdateTread.start();
-                }
-                else {
-                    PetUnit newUnit = new PetUnit(mNameEditText.getText().toString(), mBreedEditText.getText().toString(),
-                            mGender, Integer.parseInt(mWeightEditText.getText().toString()));
-                    Runnable insertIvent = () -> insertPet(newUnit);
-                    insertIvent.run();
-                }
+                   insertPet(newPet);
                 return true;
             //Отвечаем на щелчок по опции меню "Удалить"
             case R.id.action_delete:
-                if (localUnit != null){
-                    Runnable deliteIvent = () ->{
-                        delitePet(localUnit);
-                    };
-                    deliteIvent.run();
-                }
                 // Пока ничего не делаем
                 return true;
             // Отвечаем на нажатие кнопки со стрелкой «Вверх» на панели приложения
@@ -169,13 +131,13 @@ public class EditorActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void insertPet(PetUnit newUnit){
+    private void insertPet(Pet newPet){
         ContentValues values = new ContentValues();
-        values.put(PetContract.PetEntry.COLUMN_PET_NAME,newUnit.getPetName());
-        values.put(PetContract.PetEntry.COLUMN_PET_BREED,newUnit.getPetBreed());
-        values.put(PetContract.PetEntry.COLUMN_PET_GENDER,newUnit.getPetGender());
-        values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT,newUnit.getPetWeight());
-        values.put(PetContract.PetEntry.COLUMN_PET_STR_GENDER,newUnit.getStrGender());
+        values.put(PetContract.PetEntry.COLUMN_PET_NAME,newPet.getPetName());
+        values.put(PetContract.PetEntry.COLUMN_PET_BREED,newPet.getPetBreed());
+        values.put(PetContract.PetEntry.COLUMN_PET_GENDER,newPet.getPetGender());
+        values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT,newPet.getPetWeight());
+        values.put(PetContract.PetEntry.COLUMN_PET_STR_GENDER,newPet.getStrGender());
 
         PetDbHelper dbHelper = new PetDbHelper(this);
         long newRowId = 0;
@@ -183,53 +145,13 @@ public class EditorActivity extends AppCompatActivity {
             newRowId = db.insert(PetContract.PetEntry.TABLE_NAME,null, values);
         }
         if (newRowId == -1){
-            Toast.makeText(this, "Ошибка добавления данных",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ошибка",Toast.LENGTH_SHORT).show();
         }else {
-            Toast.makeText(this, "Данные успешно занесены",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "успешно",Toast.LENGTH_SHORT).show();
         }
 
         Intent intent = new Intent(EditorActivity.this, CatalogActivity.class);// создается интент чтобы открыть Активити редактора
         startActivity(intent); //Возвращаем прежний активити
-    }
-    private void updatePet(PetUnit unit){
-        if (localUnit != null){
-            PetDbHelper dbHelper = new PetDbHelper(this);
-            try (SQLiteDatabase db = dbHelper.getWritableDatabase()){
-                ContentValues values = new ContentValues();
-                values.put(PetContract.PetEntry.COLUMN_PET_NAME,unit.getPetName());
-                values.put(PetContract.PetEntry.COLUMN_PET_BREED,unit.getPetBreed());
-                values.put(PetContract.PetEntry.COLUMN_PET_GENDER,unit.getPetGender());
-                values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT,unit.getPetWeight());
-                values.put(PetContract.PetEntry.COLUMN_PET_STR_GENDER,unit.getStrGender());
-                db.update(PetContract.PetEntry.TABLE_NAME, values, "_id = ?", new String[]{String.valueOf(localUnit.getId())});
-            }
-        }
-        Intent intent = new Intent(EditorActivity.this, CatalogActivity.class);
-        startActivity(intent);
-    }
-    private void delitePet(PetUnit unit){
-        if (localUnit.getId() != 0){
-            PetDbHelper dbHelper = new PetDbHelper(this);
-            try (SQLiteDatabase db = dbHelper.getWritableDatabase()){
-                db.delete(PetContract.PetEntry.TABLE_NAME, "_id = ?", new String[]{String.valueOf(unit.getId())});
-            }
-
-            Intent intent = new Intent(EditorActivity.this, CatalogActivity.class);
-            startActivity(intent);
-        }
-    }
-    private class DBUpdateTread extends Thread{
-        private PetUnit refractUnit;
-
-        public DBUpdateTread(PetUnit newUnit) {
-            this.refractUnit = newUnit;
-        }
-
-        @Override
-        public void run(){
-            updatePet(refractUnit);
-        }
-
     }
 
 
